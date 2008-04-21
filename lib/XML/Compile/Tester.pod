@@ -1,0 +1,171 @@
+=head1 NAME
+
+XML::Compile::Tester - support XML::Compile related regression testing
+
+=head1 INHERITANCE
+
+ XML::Compile::Tester
+   is a Exporter
+
+=head1 SYNOPSIS
+
+ use XML::Compile::Tester;
+ set_compile_defaults validation => 0;
+ my $reader = create_reader $schema, "my reader", $type;
+ my $writer = create_writer $schema, "my writer", $type;
+ my $error  = reader_error  $schema, $type, $xml;
+ my $output = $templ_xml    $schema, $type, @options;
+ my $output = $templ_perl   $schema, $type, @options;
+
+=head1 DESCRIPTION
+
+The XML::Compile module suite has extensive regression testing.  Probably,
+you want to do regression testing as well.  This module provide functions
+which simplify writing tests for XML::Compile related distributions.
+
+=head1 FUNCTIONS
+
+B<compare_xml>(XML, EXPECTED, [COMMENT])
+
+=over 4
+
+Compare the XML (either a string or a XML::LibXML::Element) with
+the EXPECTED string.  Both sources are stripped from layout before
+comparing.
+
+In a future release, this algorithm will get improved to compare
+the parsed XML node trees, not the strings.
+
+=back
+
+B<create_reader>(SCHEMA, COMMENT, TYPE, OPTIONS)
+
+=over 4
+
+Create a reader for TYPE.  One test is created, reporting
+success or failure of the creation.
+
+Of course, XML::Compile::Schema subroutine compile is being called, with some
+options.  By default, C<check_values> is true, and C<include_namespaces>
+is false.  These values can be overruled using L<set_compile_defaults()|XML::Compile::Tester/"FUNCTIONS">,
+and with the OPTIONS parameter list.
+
+example: 
+
+ my $type   = pack_type 'type-namespace', 'type-localname';
+ my $reader = create_reader $schema, 'my test', $type, check_occurs => 0;
+
+=back
+
+B<create_writer>(SCHEMA, COMMENT, TYPE, OPTIONS)
+
+=over 4
+
+Create a writer for TYPE.  One test (in the Test::More sense) is created,
+reporting success or failure of the creation.
+
+Of course, XML::Compile::Schema subroutine compile is being called, with some
+options.  By default, C<check_values> and C<use_default_prefix> are true,
+and C<include_namespaces> is false.  These values can be overruled using
+L<set_compile_defaults()|XML::Compile::Tester/"FUNCTIONS">, and with the OPTIONS parameter list.
+
+example: 
+
+ my $type   = pack_type 'type-namespace', 'type-localname';
+ my $writer = create_writer $schema, 'my test', $type;
+
+=back
+
+B<reader_error>(SCHEMA, TYPE, XML)
+
+=over 4
+
+Parsing the XML to interpret the TYPE should return an error.  The
+error text is returned.
+
+=back
+
+B<set_compile_defaults>(OPTIONS)
+
+=over 4
+
+Each call to create a reader or writer (also indirectly) with
+XML::Compile::Schema subroutine compile will get these OPTIONS passed, on top
+(and overruling) the usual settings.
+
+example: 
+
+ set_compile_defaults include_namespaces => 1, validate => 0;
+
+=back
+
+B<set_default_namespace>(TESTNS)
+
+=over 4
+
+Defined which namespace to use when a relative (only localName) type
+is provided.  By default, this is C<undef> (an error when used)
+
+=back
+
+B<templ_perl>(SCHEMA, TYPE, OPTIONS)
+
+=over 4
+
+Create an example template for TYPE, as Perl data
+structure (like Data::Dumper) The OPTIONS are passed to
+XML::Compile::Schema subroutine template.
+
+=back
+
+B<templ_xml>(SCHEMA, TYPE, OPTIONS)
+
+=over 4
+
+Create an example template for TYPE, as XML message.
+The OPTIONS are passed to XML::Compile::Schema subroutine template.
+
+=back
+
+B<writer_error>(SCHEMA, TYPE, DATA)
+
+=over 4
+
+Translating the Perl DATA into the XML type should return a validation
+error, which is returned.
+
+=back
+
+B<writer_test>(WRITER, DATA, [DOC])
+
+=over 4
+
+Run the test with a compiled WRITER, which was created with L<create_writer()|XML::Compile::Tester/"FUNCTIONS">.
+When no DOC (XML::LibXML::Document object) was specified, then one will
+be created for you.
+
+=back
+
+=head1 SEE ALSO
+
+This module is part of XML-Compile-Tester distribution version 0.01,
+built on April 21, 2008. Website: F<http://perl.overmeer.net/xml-compile/>
+All modules in this suite:
+L</XML::Compile>,
+L</XML::Compile::SOAP>,
+L</XML::Compile::SOAP::Daemon>,
+L</XML::Compile::Tester>,
+L</XML::Compile::Dumper>.
+
+Please post questions or ideas to
+F<http://lists.scsys.co.uk/cgi-bin/mailman/listinfo/xml-compile|the mailinglist>
+For life contact with other developers, visit the #xml-compile channal on IRC.
+
+=head1 LICENSE
+
+Copyrights 2008 by Mark Overmeer. For other contributors see ChangeLog.
+
+This program is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+See F<http://www.perl.com/perl/misc/Artistic.html>
+
