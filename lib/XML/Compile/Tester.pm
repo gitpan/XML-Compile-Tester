@@ -1,22 +1,22 @@
 # Copyrights 2008 by Mark Overmeer.
 #  For other contributors see ChangeLog.
 # See the manual pages for details on the licensing terms.
-# Pod stripped from pm file by OODoc 1.04.
+# Pod stripped from pm file by OODoc 1.05.
 
 use warnings;
 use strict;
 
 package XML::Compile::Tester;
 use vars '$VERSION';
-$VERSION = '0.02';
+$VERSION = '0.03';
 
 use base 'Exporter';
 
 our @EXPORT = qw/
  set_compile_defaults
  set_default_namespace
- create_reader
- create_writer
+ reader_create create_reader
+ writer_create create_writer
  writer_test
  reader_error
  writer_error
@@ -26,20 +26,19 @@ our @EXPORT = qw/
  /;
 
 use Test::More;
-use Log::Report qw/try/;
-
-
-my @compile_defaults;
-sub set_compile_defaults(@) { @compile_defaults = @_ }
-
+use Data::Dumper;
+use Log::Report        qw/try/;
+use XML::Compile::Util qw/pack_type/;
 
 my $default_namespace;
-sub set_default_namespace($) { $default_namespace = shift }
+my @compile_defaults;
 
 
-sub _reltype_to_abs($) { $_[0] =~ m/\{/ ? $_[0] : "{$default_namespace}$_[0]" }
+sub _reltype_to_abs($)
+{   $_[0] =~ m/\{/ ? $_[0] : pack_type($default_namespace, $_[0]);
+}
 
-sub create_reader($$$@)
+sub reader_create($$$@)
 {   my ($schema, $test, $reltype) = splice @_, 0, 3;
 
     my $type   = _reltype_to_abs $reltype;
@@ -54,44 +53,12 @@ sub create_reader($$$@)
     isa_ok($read_t, 'CODE', "reader element $test");
     $read_t;
 }
-
-
-sub create_writer($$$@)
-{   my ($schema, $test, $reltype) = splice @_, 0, 3;
-    my $type   = _reltype_to_abs $reltype;
-
-    my $write_t = $schema->compile
-     ( WRITER             => $type
-     , check_values       => 1
-     , include_namespaces => 0
-     , use_default_prefix => 1
-     , @compile_defaults
-     , @_
-     );
-
-    isa_ok($write_t, 'CODE', "writer element $test");
-    $write_t;
-}
-
-
-sub writer_test($$;$)
-{   my ($writer, $data, $doc) = @_;
-
-    $doc ||= XML::LibXML->createDocument('1.0', 'utf-8');
-    isa_ok($doc, 'XML::LibXML::Document');
-
-    my $tree = $writer->($doc, $data);
-    ok(defined $tree);
-    defined $tree or return;
-
-    isa_ok($tree, 'XML::LibXML::Node');
-    $tree;
-}
+*create_reader = \&reader_create;  # name change in 0.03
 
 
 sub reader_error($$$)
 {   my ($schema, $reltype, $xml) = @_;
-    my $r = create_reader $schema, "check read error $reltype", $reltype;
+    my $r = reader_create $schema, "check read error $reltype", $reltype;
     defined $r or return;
 
     my $tree  = try { $r->($xml) };
@@ -109,13 +76,47 @@ sub reader_error($$$)
 }
 
 
+sub writer_create($$$@)
+{   my ($schema, $test, $reltype) = splice @_, 0, 3;
+    my $type   = _reltype_to_abs $reltype;
+
+    my $write_t = $schema->compile
+     ( WRITER             => $type
+     , check_values       => 1
+     , include_namespaces => 0
+     , use_default_prefix => 1
+     , @compile_defaults
+     , @_
+     );
+
+    isa_ok($write_t, 'CODE', "writer element $test");
+    $write_t;
+}
+*create_writer = \&writer_create;  # name change in 0.03
+
+
+sub writer_test($$;$)
+{   my ($writer, $data, $doc) = @_;
+
+    $doc ||= XML::LibXML->createDocument('1.0', 'UTF-8');
+    isa_ok($doc, 'XML::LibXML::Document');
+
+    my $tree = $writer->($doc, $data);
+    ok(defined $tree);
+    defined $tree or return;
+
+    isa_ok($tree, 'XML::LibXML::Node');
+    $tree;
+}
+
+
 sub writer_error($$$)
 {   my ($schema, $reltype, $data) = @_;
 
-    my $write = create_writer $schema, "writer for $reltype", $reltype;
+    my $write = writer_create $schema, "writer for $reltype", $reltype;
 
     my $node;
-    try { my $doc = XML::LibXML->createDocument('1.0', 'utf-8');
+    try { my $doc = XML::LibXML->createDocument('1.0', 'UTF-8');
           isa_ok($doc, 'XML::LibXML::Document');
           $node = $write->($doc, $data);
     };
@@ -159,6 +160,12 @@ sub templ_perl($$@)
      , @opts
      );
 }
+
+
+sub set_compile_defaults(@) { @compile_defaults = @_ }
+
+
+sub set_default_namespace($) { $default_namespace = shift }
 
 
 sub compare_xml($$;$)
