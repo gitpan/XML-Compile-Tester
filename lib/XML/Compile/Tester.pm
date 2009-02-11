@@ -1,14 +1,14 @@
-# Copyrights 2008 by Mark Overmeer.
+# Copyrights 2008-2009 by Mark Overmeer.
 #  For other contributors see ChangeLog.
 # See the manual pages for details on the licensing terms.
-# Pod stripped from pm file by OODoc 1.05.
+# Pod stripped from pm file by OODoc 1.06.
 
 use warnings;
 use strict;
 
 package XML::Compile::Tester;
 use vars '$VERSION';
-$VERSION = '0.04';
+$VERSION = '0.05';
 
 use base 'Exporter';
 
@@ -34,7 +34,9 @@ my @compile_defaults;
 
 
 # not using pack_type, which avoids a recursive dependency to XML::Compile
-sub _reltype_to_abs($) { $_[0] =~ m/\{/ ? $_[0] : "{$default_namespace}$_[0]" }
+sub _reltype_to_abs($)
+{   defined $default_namespace && substr($_[0], 0,1) eq '{'
+      ? "{$default_namespace}$_[0]" : $_[0] }
 
 sub reader_create($$$@)
 {   my ($schema, $test, $reltype) = splice @_, 0, 3;
@@ -79,10 +81,10 @@ sub writer_create($$$@)
     my $type   = _reltype_to_abs $reltype;
 
     my $write_t = $schema->compile
-     ( WRITER             => $type
-     , check_values       => 1
-     , include_namespaces => 0
-     , use_default_prefix => 1
+     ( WRITER                => $type
+     , check_values          => 1
+     , include_namespaces    => 0
+     , use_default_namespace => 1
      , @compile_defaults
      , @_
      );

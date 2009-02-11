@@ -5,5 +5,5 @@ README
 lib/XML/Compile/Tester.pm
 lib/XML/Compile/Tester.pod
 t/01use.t
-t/pod.t
+t/99pod.t
 META.yml                                 Module meta-data (added by MakeMaker)

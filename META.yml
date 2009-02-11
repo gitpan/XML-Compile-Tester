@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:                XML-Compile-Tester
-version:             0.04
+version:             0.05
 abstract:            support XML::Compile related regression testing
 license:             perl
 author:              

@@ -16,9 +16,10 @@ XML::Compile::Tester - support XML::Compile related regression testing
  set_compile_defaults();  # reset
 
  # set default namespace, such that $type only needs to use local
+ my $ns     = 'some-schemas-targetNamespace';
  my $type   = pack_type($ns, 'localName'); # X::C::Util
  set_default_namespace($ns);
- my $type   = 'localName';
+ my $type   = 'localName'; # now implicit in $ns
 
  my $reader = reader_create($schema, "my reader", $type, @opts);
  my $data   = $reader->($xml);  # $xml is string, filename, node
@@ -30,8 +31,8 @@ XML::Compile::Tester - support XML::Compile related regression testing
  my $rerror = reader_error($schema, $type, $xml);
  my $werror = writer_error($schema, $type, $data);
 
- my $output = $templ_xml($schema, $type, @options);
- my $output = $templ_perl($schema, $type, @options);
+ my $output = templ_xml($schema, $type, @options);
+ my $output = templ_perl($schema, $type, @options);
 
 =head1 DESCRIPTION
 
@@ -100,7 +101,7 @@ Create a writer for TYPE.  One test (in the Test::More sense) is created,
 reporting success or failure of the creation.
 
 Of course, XML::Compile::Schema subroutine compile is being called, with some
-options.  By default, C<check_values> and C<use_default_prefix> are true,
+options.  By default, C<check_values> and C<use_default_namespace> are true,
 and C<include_namespaces> is false.  These values can be overruled using
 L<set_compile_defaults()|XML::Compile::Tester/"Helpers">, and with the OPTIONS parameter list.
 
@@ -227,17 +228,20 @@ is provided.  By default, this is C<undef> (an error when used)
 
 =head1 SEE ALSO
 
-This module is part of XML-Compile-Tester distribution version 0.04,
-built on October 01, 2008. Website: F<http://perl.overmeer.net/xml-compile/>
+This module is part of XML-Compile-Tester distribution version 0.05,
+built on February 11, 2009. Website: F<http://perl.overmeer.net/xml-compile/>
 
 All modules in this suite:
 L<XML::Compile>,
 L<XML::Compile::SOAP>,
+L<XML::Compile::SOAP12>,
 L<XML::Compile::SOAP::Daemon>,
 L<XML::Compile::Tester>,
 L<XML::Compile::Cache>,
+L<XML::Compile::Dumper>,
 L<XML::Rewrite>,
-L<XML::Compile::Dumper>.
+and
+L<XML::LibXML::Simple>.
 
 Please post questions or ideas to the mailinglist at
 F<http://lists.scsys.co.uk/cgi-bin/mailman/listinfo/xml-compile>
@@ -246,7 +250,7 @@ on C<irc.perl.org>.
 
 =head1 LICENSE
 
-Copyrights 2008 by Mark Overmeer. For other contributors see ChangeLog.
+Copyrights 2008-2009 by Mark Overmeer. For other contributors see ChangeLog.
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
