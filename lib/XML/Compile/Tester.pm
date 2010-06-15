@@ -1,4 +1,4 @@
-# Copyrights 2008-2009 by Mark Overmeer.
+# Copyrights 2008-2010 by Mark Overmeer.
 #  For other contributors see ChangeLog.
 # See the manual pages for details on the licensing terms.
 # Pod stripped from pm file by OODoc 1.06.
@@ -8,7 +8,7 @@ use strict;
 
 package XML::Compile::Tester;
 use vars '$VERSION';
-$VERSION = '0.05';
+$VERSION = '0.06';
 
 use base 'Exporter';
 
@@ -143,7 +143,7 @@ sub templ_xml($$@)
 
     $schema->template
      ( XML                => $abs
-     , include_namespaces => 0
+     , include_namespaces => 1
      , @opts
      ) . "\n";
 }
